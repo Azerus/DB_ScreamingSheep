@@ -36,7 +36,7 @@ async def on_message(message):
     bot_react = check_message(msg)
 
     time.sleep(1)
-    
+
     if bot_react:
         await message.delete()
         await message.channel.send("AAAAAAAAAAAAAA!")
@@ -47,6 +47,8 @@ async def on_message(message):
             await command_help(message.channel)
         elif msg == '{}users'.format(PREFIX):
             await command_users(message.channel)
+        elif "загон" not in [y.name.lower() for y in message.author.roles]:
+            await message.delete()
     elif msg.find("коза") != -1:
         await message.channel.send("AAAAAAAAAAAAAA!")
 
