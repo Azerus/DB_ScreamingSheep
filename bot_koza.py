@@ -47,22 +47,5 @@ async def on_message(message):
     if str(message.channel) in channels:
         if message.content.find("коза") != -1:
             await message.channel.send("AAAAAAAAAAAAAA!")
-        elif message.content == '{}help'.format(PREFIX):
-            await command_help(message.channel)
-        elif message.content == '{}users'.format(PREFIX):
-            await command_users(message.channel)
-
-
-async def command_help(channel):
-    emb = discord.Embed(title='Навигация по командам')
-    emb.add_field(name='{}help'.format(PREFIX), value='Список команд')
-    await channel.send(embed=emb)
-
-
-async def command_users(channel):
-    # emb = discord.Embed(title='Пользователи')
-    # emb.add_field(name='{}help'.format(PREFIX), value='Список команд')
-    server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
-    await channel.send(f"""Количество пользователей: {server_id.member_count}""")
 
 client.run(token)
