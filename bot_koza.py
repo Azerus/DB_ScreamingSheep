@@ -2,18 +2,11 @@ import discord
 import profanity_filter
 import os
 
+
 PREFIX = "!"
 
 
-def read_token():
-    with open("token.txt", "r") as f:
-        lines = f.readlines()
-        return lines[0].strip()
-
-
-def check_message(message):
-    msg = message.content.lower()
-
+def check_message(msg):
     for word in profanity_filter.bad_words:
         if msg.find(word) != -1:
             return True
@@ -36,8 +29,10 @@ async def on_ready():
 async def on_message(message):
     channels = ["загон"]
 
+    msg = message.content.lower()
+
     # profanity_filter
-    bot_react = check_message(message)
+    bot_react = check_message(msg)
 
     if bot_react:
         await message.delete()
@@ -45,12 +40,12 @@ async def on_message(message):
 
     # commands
     if str(message.channel) in channels:
-        if message.content.find("коза") != -1:
-            await message.channel.send("AAAAAAAAAAAAAA!")
-        elif message.content == '{}help'.format(PREFIX):
+        if msg == '{}help'.format(PREFIX):
             await command_help(message.channel)
-        elif message.content == '{}users'.format(PREFIX):
+        elif msg == '{}users'.format(PREFIX):
             await command_users(message.channel)
+    elif msg.find("коза") != -1:
+        await message.channel.send("AAAAAAAAAAAAAA!")
 
 
 async def command_help(channel):
