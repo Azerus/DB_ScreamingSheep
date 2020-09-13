@@ -2,6 +2,8 @@ import discord
 import profanity_filter
 import os
 
+PREFIX = "!"
+
 
 def read_token():
     with open("token.txt", "r") as f:
