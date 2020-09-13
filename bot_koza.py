@@ -22,7 +22,7 @@ def check_message(message):
 
 
 # token = read_token()
-token = os.environ.get('BOT_TOKEN')
+token = str(os.environ.get('BOT_TOKEN'))
 
 client = discord.Client()
 
