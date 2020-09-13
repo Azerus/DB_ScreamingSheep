@@ -19,8 +19,8 @@ def check_message(message):
     return False
 
 
-token = read_token()
-# token = str(os.environ.get('BOT_TOKEN'))
+# token = read_token()
+token = str(os.environ.get('BOT_TOKEN'))
 
 client = discord.Client()
 
