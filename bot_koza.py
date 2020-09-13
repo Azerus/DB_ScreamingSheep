@@ -1,6 +1,7 @@
 import discord
 import profanity_filter
 import os
+import time
 
 
 PREFIX = "!"
@@ -34,6 +35,8 @@ async def on_message(message):
     # profanity_filter
     bot_react = check_message(msg)
 
+    time.sleep(1)
+    
     if bot_react:
         await message.delete()
         await message.channel.send("AAAAAAAAAAAAAA!")
