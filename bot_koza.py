@@ -62,7 +62,7 @@ async def command_help(channel):
 async def command_users(channel):
     # emb = discord.Embed(title='Пользователи')
     # emb.add_field(name='{}help'.format(PREFIX), value='Список команд')
-    server_id = os.environ.get('SERVER_ID')
+    server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
     await channel.send(f"""Количество пользователей: {server_id.member_count}""")
 
 client.run(token)
