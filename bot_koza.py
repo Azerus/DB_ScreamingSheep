@@ -2,6 +2,7 @@ import discord
 import profanity_filter
 import os
 import time
+import koza_settings
 
 
 PREFIX = "!"
@@ -35,14 +36,20 @@ async def on_message(message):
     # profanity_filter
     bot_react = check_message(msg)
 
-    time.sleep(1)
-
     if bot_react:
-        await message.delete()
-        await message.channel.send("AAAAAAAAAAAAAA!")
+        delete = True
+        for role in message.author.roles:
+            if role.name.lower() in [ignore for ignore in koza_settings.profanity_ignore_groups]:
+                delete = False
+
+        if delete:
+            await message.delete()
+            time.sleep(1)
+            await message.channel.send("AAAAAAAAAAAAAA!")
+            return
 
     # commands
-    if str(message.channel) in channels:
+    if str(message.channel) in koza_settings.command_channel:
         if msg == '{}help'.format(PREFIX):
             await command_help(message.channel)
         elif msg == '{}users'.format(PREFIX):
