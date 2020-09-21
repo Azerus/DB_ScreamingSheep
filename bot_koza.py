@@ -57,6 +57,7 @@ async def on_message(message):
         elif "загон" not in [y.name.lower() for y in message.author.roles]:
             await message.delete()
     elif msg.find("коза") != -1:
+        time.sleep(1)
         await message.channel.send("AAAAAAAAAAAAAA!")
 
 
