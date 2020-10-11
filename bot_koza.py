@@ -4,6 +4,7 @@ import os
 import time
 import koza_settings
 import random
+import asyncio
 
 
 token = str(os.environ.get('BOT_TOKEN'))
@@ -26,8 +27,28 @@ def get_log_channel(name):
     return None
 
 
+async def status_task():
+    while True:
+        status = random.randint(1, 4)
+        if status == 1:
+            await client.change_presence(status=discord.Status.online, activity=discord.Game(koza_settings.game), )
+        elif status == 2:
+            await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+                                                                   name=koza_settings.watching))
+        elif status == 3:
+            await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
+                                                                   name=koza_settings.listening))
+        elif status == 4:
+            await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+                                                                   name=koza_settings.happy_derg))
+        await asyncio.sleep(3600)
+
+
 @client.event
 async def on_ready():
+
+    client.loop.create_task(status_task())
+
     # Setting `Playing in Heroes of the Storm` status
     # await client.change_presence(status=discord.Status.online, activity=discord.Game(koza_settings.game), )
 
@@ -39,8 +60,8 @@ async def on_ready():
     # await client.change_presence(activity=discord.Streaming(name=koza_settings.scream, url=koza_settings.happy_zerg))
 
     # Setting `Listening RoadRadio ` status
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
-                                                           name=koza_settings.listening))
+    # await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
+    #                                                       name=koza_settings.listening))
 
 
 @client.event
