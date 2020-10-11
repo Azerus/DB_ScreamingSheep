@@ -27,8 +27,19 @@ def get_log_channel(name):
 
 @client.event
 async def on_ready():
-    status = koza_settings.statuses[1]
-    await client.change_presence(status=discord.Status.online, activity=discord.Game(status), )
+    # Setting `Playing in Heroes of the Storm` status
+    # await client.change_presence(status=discord.Status.online, activity=discord.Game(koza_settings.game), )
+
+    # Setting `Watching for you` status
+    # await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+    #                                                       name=koza_settings.watching))
+
+    # Setting `Streaming happyderg` status
+    # await client.change_presence(activity=discord.Streaming(name=koza_settings.scream, url=koza_settings.happy_zerg))
+
+    # Setting `Listening RoadRadio ` status
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
+                                                           name=koza_settings.listening))
 
 
 @client.event
