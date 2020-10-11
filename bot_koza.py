@@ -3,6 +3,7 @@ import profanity_filter
 import os
 import time
 import koza_settings
+import random
 
 
 token = str(os.environ.get('BOT_TOKEN'))
