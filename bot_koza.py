@@ -2,14 +2,11 @@ import discord
 import profanity_filter
 import os
 import time
-from discord.ext import commands
-import random
-import youtube_dl
 import koza_settings
 
 
 token = str(os.environ.get('BOT_TOKEN'))
-client = commands.Bot(command_prefix = '!')
+client = discord.Client()
 
 
 def check_message(msg):
