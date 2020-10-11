@@ -12,15 +12,17 @@ client = discord.Client()
 def check_message(msg):
     for word in profanity_filter.bad_words:
         if msg.find(word) != -1:
-            return True
+            return [True, word]
 
-    return False
+    return [False, ""]
 
 
 def get_log_channel(name):
     for channel in client.get_guild(int(os.environ.get('SERVER_ID'))).channels:
         if channel.name == name:
             return channel
+
+    return None
 
 
 @client.event
@@ -36,7 +38,7 @@ async def on_message(message):
     # profanity_filter
     bot_react = check_message(msg)
 
-    if bot_react:
+    if bot_react[0]:
         delete = True
         for role in message.author.roles:
             if role.name.lower() in [ignore for ignore in koza_settings.profanity_ignore_groups]:
@@ -44,7 +46,9 @@ async def on_message(message):
 
         if delete:
             log_channel = get_log_channel(koza_settings.log_channel)
-            await log_channel.send(message.author.name + ": " + msg)
+            if log_channel is not None:
+                await log_channel.send(message.author.name + ": " + msg + "\n" "Плохое слово: " + bot_react[1])
+
             await message.delete()
             time.sleep(1)
             await message.channel.send("AAAAAAAAAAAAAA!")
