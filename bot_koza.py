@@ -41,7 +41,7 @@ async def status_task():
         elif status == 4:
             await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
                                                                    name=koza_settings.happy_derg))
-        await asyncio.sleep(900)
+        await asyncio.sleep(3600)
 
 
 @client.event
