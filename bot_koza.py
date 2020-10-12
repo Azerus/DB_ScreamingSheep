@@ -29,18 +29,18 @@ def get_log_channel(name):
 
 async def status_task():
     while True:
-        status = random.randint(1, 4)
+        status = random.randint(1, 3)
+
         if status == 1:
-            await client.change_presence(status=discord.Status.online, activity=discord.Game(koza_settings.game), )
+            await client.change_presence(status=discord.Status.online,
+                                         activity=discord.Game(random.choice(koza_settings.games)), )
         elif status == 2:
             await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                                   name=koza_settings.watching))
+                                                                   name=random.choice(koza_settings.watching)))
         elif status == 3:
             await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening,
-                                                                   name=koza_settings.listening))
-        elif status == 4:
-            await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
-                                                                   name=koza_settings.happy_derg))
+                                                                   name=random.choice(koza_settings.listening)))
+
         await asyncio.sleep(3600)
 
 
