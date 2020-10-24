@@ -115,18 +115,16 @@ async def clear(ctx, channel, number):
         if role.name.lower() in [ignore for ignore in koza_settings.moderation_groups]:
             delete = True
 
-    print(channel)
     if not delete or not number.isdigit():
         return
 
-    print(number)
     server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
     channel_purge = discord.utils.get(server_id.text_channels, name=str(channel))
 
     if channel_purge is None:
         return
 
-    number = int(number) + 1
+    number = int(number)
     await channel_purge.purge(limit=number)
 
 
