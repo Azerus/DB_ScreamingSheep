@@ -99,7 +99,7 @@ async def on_message(message):
         await message.channel.send("AAAAAAAAAAAAAA!")
 
 
-@client.command()
+@client.command(brief='- Server online')
 async def users(ctx):
     # emb = discord.Embed(title='Пользователи')
     # emb.add_field(name='{}help'.format(PREFIX), value='Список команд')
@@ -107,7 +107,7 @@ async def users(ctx):
     await ctx.send(f"""Количество пользователей: {server_id.member_count}""")
 
 
-@client.command()
+@client.command(brief='- Remove messages from channel')
 async def clear(ctx, channel, number):
     delete = False
 
