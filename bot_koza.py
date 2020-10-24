@@ -1,4 +1,5 @@
 import discord
+from discord.ext import commands
 import profanity_filter
 import os
 import time
@@ -6,9 +7,11 @@ import koza_settings
 import random
 import asyncio
 
-
 token = str(os.environ.get('BOT_TOKEN'))
-client = discord.Client()
+client = commands.Bot(command_prefix='!')
+
+
+# client = discord.Client()
 
 
 def check_message(msg):
@@ -46,7 +49,6 @@ async def status_task():
 
 @client.event
 async def on_ready():
-
     client.loop.create_task(status_task())
 
     # Setting `Playing in Heroes of the Storm` status
@@ -89,28 +91,43 @@ async def on_message(message):
 
     # commands
     if str(message.channel) in koza_settings.command_channel:
-        if msg == '{}help'.format(koza_settings.PREFIX):
-            await command_help(message.channel)
-        elif msg == '{}users'.format(koza_settings.PREFIX):
-            await command_users(message.channel)
-        elif "загон" not in [y.name.lower() for y in message.author.roles]:
-            await message.delete()
+        await client.process_commands(message)
+        # if "загон" not in [y.name.lower() for y in message.author.roles]:
+            # await message.delete()
     elif msg.find("коза") != -1:
         time.sleep(1)
         await message.channel.send("AAAAAAAAAAAAAA!")
 
 
-async def command_help(channel):
-    emb = discord.Embed(title='Навигация по командам')
-    emb.add_field(name='{}help'.format(koza_settings.PREFIX), value='Список команд')
-    await channel.send(embed=emb)
-
-
-async def command_users(channel):
+@client.command()
+async def users(ctx):
     # emb = discord.Embed(title='Пользователи')
     # emb.add_field(name='{}help'.format(PREFIX), value='Список команд')
     server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
-    await channel.send(f"""Количество пользователей: {server_id.member_count}""")
+    await ctx.send(f"""Количество пользователей: {server_id.member_count}""")
+
+
+@client.command()
+async def clear(ctx, channel, number):
+    delete = False
+
+    for role in ctx.author.roles:
+        if role.name.lower() in [ignore for ignore in koza_settings.moderation_groups]:
+            delete = True
+
+    print(channel)
+    if not delete or not number.isdigit():
+        return
+
+    print(number)
+    server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
+    channel_purge = discord.utils.get(server_id.text_channels, name=str(channel))
+
+    if channel_purge is None:
+        return
+
+    number = int(number) + 1
+    await channel_purge.purge(limit=number)
 
 
 client.run(token)
