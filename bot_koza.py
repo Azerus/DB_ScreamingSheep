@@ -10,6 +10,7 @@ import asyncio
 import pymongo
 from pymongo import MongoClient
 import user_level_data
+import youtube_dl
 
 
 token = str(os.environ.get('BOT_TOKEN'))
@@ -58,6 +59,14 @@ async def status_task():
 async def on_ready():
     client.loop.create_task(status_task())
 
+    # max_leght = 25
+    # name = koza_settings.special[0:max_leght]
+    # if len(koza_settings.special) > max_leght:
+    #     name += "..."
+
+    # activity = discord.Game(name=name, application_id=501063122581454849, state="1194630", details="asd")
+    # await client.change_presence(status=discord.Status.online, activity=activity)
+
     # Setting `Playing in Heroes of the Storm` status
     # await client.change_presence(status=discord.Status.online, activity=discord.Game(koza_settings.game), )
 
@@ -102,9 +111,43 @@ async def on_message(message):
         return
         # if "загон" not in [y.name.lower() for y in message.author.roles]:
             # await message.delete()
-    elif msg.find("коза") != -1:
+    elif msg.find("репортаж козы с места событий") != -1:
+        time.sleep(1)
+        await message.channel.send("https://www.youtube.com/watch?v=SIaFtAKnqBU")
+    elif msg.find("коза орет") != -1:
         time.sleep(1)
         await message.channel.send("AAAAAAAAAAAAAA!")
+    elif msg.find("коза") != -1 or msg.find("козу") != -1 or msg.find("козы") != -1 or msg.find("козой") != -1 or msg.find("козе") != -1:
+        time.sleep(1)
+        reaction = random.randint(0, 6)
+        text = f"Коза хоечет прописать в табло {message.author.name}"
+
+        if reaction == 0:
+            text = f"Коза с подозрением смотрит на {message.author.name}"
+
+        if reaction == 1:
+            text = f"Коза бьет по земле копытами и хочет боднуть {message.author.name}"
+
+        if reaction == 2:
+            text = f"Коза хочет поорать с {message.author.name}"
+
+        if reaction == 3:
+            text = f"Коза выехала на дом к {message.author.name}"
+
+        if reaction == 4:
+            text = f"Коза хочет в отпуск подальше от {message.author.name}"
+
+        if reaction == 5:
+            text = f"Коза не понимает {message.author.name}"
+
+        if reaction == 6:
+            text = f"Коза, одетая в скафандр, парит в открытом космосе и ее крик слышит {message.author.name}"
+
+        emb = discord.Embed(title=f"Действия козы:",
+                            description=text,
+                            color=0x00ff00)
+
+        await message.channel.send(embed=emb)
 
     # level system
     for role in message.author.roles:
@@ -230,5 +273,85 @@ async def rewards(ctx):
                         color=0x00ff00)
 
     await ctx.channel.send(embed=emb)
+
+
+@client.command(brief='- Koza join to your party')
+async def koza_dj_start(ctx):
+    server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
+    channel = discord.utils.get(server_id.voice_channels, name="KozaDJ")
+    if channel is not None:
+        await channel.connect()
+
+
+@client.command(brief='- Koza leave your party')
+async def koza_dj_stop(ctx):
+    if ctx.guild.voice_client is not None:
+        await ctx.guild.voice_client.disconnect() # Leave the channel
+
+
+@client.command(brief='- Koza play music from youtube')
+async def koza_dj_play(ctx, url: str):
+
+    if url.startswith("https://www.youtube.com/watch?v=") == -1:
+        emb = discord.Embed(title=f"Коза диджей",
+                            description=f"Ссылка не на youtube.com",
+                            color=0x00ff00)
+
+        await ctx.channel.send(embed=emb)
+        return
+
+    song = os.path.isfile("song.mp3")
+    try:
+        if song:
+            os.remove("song.mp3")
+    except PermissionError:
+        emb = discord.Embed(title=f"Коза диджей",
+                            description=f"Проигрывается другая музыка. Подождите.",
+                            color=0x00ff00)
+
+        await ctx.channel.send(embed=emb)
+        return
+
+    voice = ctx.guild.voice_client
+
+    if voice is None:
+        emb = discord.Embed(title=f"Коза диджей",
+                            description=f"Коза не войс чате!",
+                            color=0x00ff00)
+
+        await ctx.channel.send(embed=emb)
+        if song:
+            os.remove("song.mp3")
+
+        return
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+
+    for file in os.listdir("./"):
+        if file.endswith(".mp3"):
+            name = file
+            os.rename(file, "song.mp3")
+
+    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: print(f"{name} has finished"))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07
+
+    new_name = name.rsplit("-", 2)
+
+    emb = discord.Embed(title=f"Коза диджей",
+                        description=f"Сейчас играет: {new_name[0]}",
+                        color=0x00ff00)
+
+    await ctx.channel.send(embed=emb)
+
 
 client.run(token)
