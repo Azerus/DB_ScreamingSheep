@@ -10,4 +10,5 @@ games = ["Heroes of the Storm", "Skyrim: Goat Edition", "Warcraft 3: Refunded", 
 watching = ["на тебя!", "стрим HappyDerg", "Netflix", "акции Activision Blizzard", "темы на форуме",
             "фильм Паршивая овца"]
 blizzcon = "трансляцию Blizzcon 2021"
+special = "The Dark Pictures Anthology: Little Hope"
 listening = ["Авторадио", "Хард Рок", "музыку в Spotify", "сплетни бабки"]
