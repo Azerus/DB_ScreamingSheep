@@ -59,9 +59,9 @@ async def status_task():
 async def on_ready():
     client.loop.create_task(status_task())
 
-    # max_leght = 25
-    # name = koza_settings.special[0:max_leght]
-    # if len(koza_settings.special) > max_leght:
+    # max_length = 25
+    # name = koza_settings.special[0:max_length]
+    # if len(koza_settings.special) > max_length:
     #     name += "..."
 
     # activity = discord.Game(name=name, application_id=501063122581454849, state="1194630", details="asd")
@@ -119,29 +119,7 @@ async def on_message(message):
         await message.channel.send("AAAAAAAAAAAAAA!")
     elif msg.find("коза") != -1 or msg.find("козу") != -1 or msg.find("козы") != -1 or msg.find("козой") != -1 or msg.find("козе") != -1:
         time.sleep(1)
-        reaction = random.randint(0, 6)
-        text = f"Коза хоечет прописать в табло {message.author.name}"
-
-        if reaction == 0:
-            text = f"Коза с подозрением смотрит на {message.author.name}"
-
-        if reaction == 1:
-            text = f"Коза бьет по земле копытами и хочет боднуть {message.author.name}"
-
-        if reaction == 2:
-            text = f"Коза хочет поорать с {message.author.name}"
-
-        if reaction == 3:
-            text = f"Коза выехала на дом к {message.author.name}"
-
-        if reaction == 4:
-            text = f"Коза хочет в отпуск подальше от {message.author.name}"
-
-        if reaction == 5:
-            text = f"Коза не понимает {message.author.name}"
-
-        if reaction == 6:
-            text = f"Коза, одетая в скафандр, парит в открытом космосе и ее крик слышит {message.author.name}"
+        text = random.choice(koza_settings.reaction).format(message.author.name)
 
         emb = discord.Embed(title=f"Действия козы:",
                             description=text,
@@ -296,13 +274,16 @@ async def koza_dj_stop(ctx):
 @client.command(brief='- Koza play music from youtube')
 async def koza_dj_play(ctx, url: str):
 
-    if url.startswith("https://www.youtube.com/watch?v=") == -1:
+    max_length = 15
+    if len(url) > max_length or url.find("http") != -1:
         emb = discord.Embed(title=f"Коза диджей",
-                            description=f"Ссылка не на youtube.com",
+                            description=f"Коза орет с тебя!",
                             color=0x00ff00)
 
         await ctx.channel.send(embed=emb)
         return
+
+    url = "https://www.youtube.com/watch?v=" + url
 
     song = os.path.isfile("song.mp3")
     try:
