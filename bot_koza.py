@@ -19,7 +19,53 @@ client = commands.Bot(command_prefix=koza_settings.PREFIX)
 cluster = MongoClient(str(os.environ.get('DB')))
 db = cluster["discord"]
 collection = db["user_data"]
+music_status = koza_settings.MusicStatus.NONE
+music_collection = ["", "", "", "", ""]
+max_music = 5
 # client = discord.Client()
+
+ytdl_format_options = {
+    'format': 'bestaudio/best',
+    'outtmpl': '%(extractor)s-%(id)s-%(title)s.%(ext)s',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+}
+
+ffmpeg_options = {
+    "options": "-vn -loglevel quiet -hide_banner -nostats",
+    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 0 -nostdin"
+}
+
+ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
+
+class YTDLSource(discord.PCMVolumeTransformer):
+    def __init__(self, source, *, data, volume=0.5):
+        super().__init__(source, volume)
+
+        self.data = data
+
+        self.title = data.get('title')
+        self.url = data.get('url')
+
+    @classmethod
+    async def from_url(cls, url, *, loop=None, stream=False):
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = data['url'] if stream else ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
 def check_message(msg):
@@ -101,7 +147,8 @@ async def on_message(message):
                 await log_channel.send(message.author.name + ": " + msg + "\n" "Плохое слово: " + bot_react[1])
 
             await message.delete()
-            time.sleep(1)
+            async with message.channel.typing():
+                time.sleep(1)
             await message.channel.send("AAAAAAAAAAAAAA!")
             return
 
@@ -112,13 +159,17 @@ async def on_message(message):
         # if "загон" not in [y.name.lower() for y in message.author.roles]:
             # await message.delete()
     elif msg.find("репортаж козы с места событий") != -1:
-        time.sleep(1)
+        async with message.channel.typing():
+            time.sleep(1)
         await message.channel.send("https://www.youtube.com/watch?v=SIaFtAKnqBU")
     elif msg.find("коза орет") != -1:
-        time.sleep(1)
+        async with message.channel.typing():
+            time.sleep(1)
         await message.channel.send("AAAAAAAAAAAAAA!")
     elif msg.find("коза") != -1 or msg.find("козу") != -1 or msg.find("козы") != -1 or msg.find("козой") != -1 or msg.find("козе") != -1:
-        time.sleep(1)
+        async with message.channel.typing():
+            time.sleep(1)
+
         text = random.choice(koza_settings.reaction).format(message.author.name)
 
         emb = discord.Embed(title=f"Действия козы:",
@@ -188,6 +239,8 @@ async def users(ctx):
     # emb = discord.Embed(title='Пользователи')
     # emb.add_field(name='{}help'.format(PREFIX), value='Список команд')
     server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
+    async with ctx.typing():
+        time.sleep(1)
     await ctx.send(f"""Количество пользователей: {server_id.member_count}""")
 
 
@@ -223,6 +276,8 @@ async def rank(ctx):
                             description=f"У вас нет системы уровня!!!",
                             color=0x00ff00)
 
+        async with ctx.typing():
+            time.sleep(1)
         await ctx.channel.send(embed=emb)
         return
 
@@ -241,6 +296,8 @@ async def rank(ctx):
                                     f"До следующего уровня: {user_level_data.exp_data[cur_level][2] - cur_xp} ед.",
                         color=0x00ff00)
 
+    async with ctx.typing():
+        time.sleep(1)
     await ctx.channel.send(embed=emb)
 
 
@@ -254,6 +311,8 @@ async def rewards(ctx):
                                     f"5 уровень: {user_level_data.exp_data[5][1]} \n",
                         color=0x00ff00)
 
+    async with ctx.typing():
+        time.sleep(1)
     await ctx.channel.send(embed=emb)
 
 
@@ -261,7 +320,7 @@ async def rewards(ctx):
 async def koza_dj_start(ctx):
     server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
     channel = discord.utils.get(server_id.voice_channels, name="KozaDJ")
-    if channel is not None:
+    if channel is not None and ctx.guild.voice_client is None:
         await channel.connect()
 
 
@@ -273,27 +332,30 @@ async def koza_dj_stop(ctx):
 
 @client.command(brief='- Koza play music from youtube')
 async def koza_dj_play(ctx, url: str):
-
+    global music_status
     max_length = 15
+
     if len(url) > max_length or url.find("http") != -1:
         emb = discord.Embed(title=f"Коза диджей",
                             description=f"Коза орет с тебя!",
                             color=0x00ff00)
 
+        async with ctx.typing():
+            time.sleep(1)
         await ctx.channel.send(embed=emb)
         return
 
-    url = "https://www.youtube.com/watch?v=" + url
+    if music_status != koza_settings.MusicStatus.NONE:
+        error_text = "none"
+        if music_status == koza_settings.MusicStatus.PLAYING:
+            error_text = "Играет трек. Подождите."
 
-    song = os.path.isfile("song.mp3")
-    try:
-        if song:
-            os.remove("song.mp3")
-    except PermissionError:
         emb = discord.Embed(title=f"Коза диджей",
-                            description=f"Проигрывается другая музыка. Подождите.",
+                            description=error_text,
                             color=0x00ff00)
 
+        async with ctx.typing():
+            time.sleep(1)
         await ctx.channel.send(embed=emb)
         return
 
@@ -304,50 +366,43 @@ async def koza_dj_play(ctx, url: str):
                             description=f"Коза не войс чате!",
                             color=0x00ff00)
 
+        async with ctx.typing():
+            time.sleep(1)
         await ctx.channel.send(embed=emb)
-        if song:
-            os.remove("song.mp3")
-
         return
 
-    for file in os.listdir("./"):
-        if file.endswith(".mp3") or file.endswith(".webm") or file.endswith(".m4a"):
-            os.remove(file)
+    music_status = koza_settings.MusicStatus.PLAYING
 
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',
-            'preferredquality': '192',
-        }],
-    }
+    url = "https://www.youtube.com/watch?v=" + url
 
-    emb = discord.Embed(title=f"Коза диджей",
-                        description=f"Идет загрузка файла. Подождите.",
-                        color=0x00ff00)
+    def finish(file_name):
+        print(f"{file_name} has finished")
+        global music_status
+        music_status = koza_settings.MusicStatus.NONE
 
-    await ctx.channel.send(embed=emb)
+    """Streams from a url (same as yt, but doesn't predownload)"""
+    async with ctx.typing():
+        try:
+            player = await YTDLSource.from_url(url, loop=client.loop, stream=True)
+            ctx.voice_client.play(player, after=lambda e: finish(player.title))
+            voice.source = discord.PCMVolumeTransformer(voice.source)
+            voice.source.volume = 0.07
 
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
+            emb = discord.Embed(title=f"Коза диджей",
+                                description=f"Сейчас играет: {player.title}",
+                                color=0x00ff00)
 
-    for file in os.listdir("./"):
-        if file.endswith(".mp3"):
-            name = file
-            os.rename(file, "song.mp3")
+            await ctx.channel.send(embed=emb)
+        except youtube_dl.utils.DownloadError as e:
+            finish("ERROR")
 
-    voice.play(discord.FFmpegPCMAudio("song.mp3"), after=lambda e: print(f"{name} has finished"))
-    voice.source = discord.PCMVolumeTransformer(voice.source)
-    voice.source.volume = 0.07
+            async with ctx.typing():
+                time.sleep(1)
 
-    new_name = name.rsplit("-", 2)
+            emb = discord.Embed(title=f"Коза диджей",
+                                description=f"Что-то пошло не так.",
+                                color=0x00ff00)
 
-    emb = discord.Embed(title=f"Коза диджей",
-                        description=f"Сейчас играет: {new_name[0]}",
-                        color=0x00ff00)
-
-    await ctx.channel.send(embed=emb)
-
+            await ctx.channel.send(embed=emb)
 
 client.run(token)
