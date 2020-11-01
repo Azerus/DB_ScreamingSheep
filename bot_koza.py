@@ -174,12 +174,15 @@ async def on_message(message):
     for user in user_data:
         cur_xp = user["xp"]
         cur_level = user["level"]
-
+        cur_name = user["user_name"]
         if cur_level >= user_level_data.max_level:
             return
 
         new_xp = cur_xp + 1
         new_level = cur_level
+        new_name = cur_name
+        if cur_name != message.author.name:
+            new_name = message.author.name
 
         if new_xp >= user_level_data.exp_data[cur_level][2]:
             new_level = cur_level+1
@@ -195,8 +198,9 @@ async def on_message(message):
             if role is not None:
                 await message.author.add_roles(role)
 
-    collection.update_one({"id": author_id}, {"$set": {"xp": new_xp}}, upsert=True)
-    collection.update_one({"id": author_id}, {"$set": {"level": new_level}}, upsert=True)
+        collection.update_one({"id": author_id}, {"$set": {"xp": new_xp}}, upsert=True)
+        collection.update_one({"id": author_id}, {"$set": {"level": new_level}}, upsert=True)
+        collection.update_one({"id": author_id}, {"$set": {"user_name": new_name}}, upsert=True)
 
     # await message.channel.send("updated")
 
@@ -324,6 +328,10 @@ async def koza_dj_play(ctx, url: str):
             os.remove("song.mp3")
 
         return
+
+    for file in os.listdir("./"):
+        if file.endswith(".mp3") or file.endswith(".webm"):
+            os.remove(file)
 
     ydl_opts = {
         'format': 'bestaudio/best',
