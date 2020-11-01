@@ -311,7 +311,7 @@ async def koza_dj_play(ctx, url: str):
         return
 
     for file in os.listdir("./"):
-        if file.endswith(".mp3") or file.endswith(".webm"):
+        if file.endswith(".mp3") or file.endswith(".webm") or file.endswith(".m4a"):
             os.remove(file)
 
     ydl_opts = {
