@@ -1,3 +1,5 @@
+from enum import Enum
+
 profanity_ignore_groups = ["загон", "владыка мира нексуса"]
 level_system_ignore = ["владыка мира нексуса"]
 moderation_groups = ["загон", "владыка мира нексуса"]
@@ -33,3 +35,9 @@ reaction = ["Коза хочет прописать в табло {}",
             "Коза орет над {}",
             "Коза хочет чтобы {} не беспокоил ее",
             "Коза улетела на орбиту планеты Плутон от {}"]
+
+
+class MusicStatus(Enum):
+    NONE = 1
+    DOWNLOADING = 2
+    PLAYING = 3
