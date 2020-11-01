@@ -341,6 +341,13 @@ async def koza_dj_play(ctx, url: str):
             'preferredquality': '192',
         }],
     }
+
+    emb = discord.Embed(title=f"Коза диджей",
+                        description=f"Идет загрузка файла. Подождите.",
+                        color=0x00ff00)
+
+    await ctx.channel.send(embed=emb)
+
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
