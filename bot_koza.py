@@ -321,7 +321,9 @@ async def rewards(ctx):
                                     f"7 уровень: {user_level_data.exp_data[7][1]} \n"
                                     f"8 уровень: {user_level_data.exp_data[8][1]} \n"
                                     f"9 уровень: {user_level_data.exp_data[9][1]} \n"
-                                    f"10 уровень: {user_level_data.exp_data[10][1]} \n",
+                                    f"10 уровень: {user_level_data.exp_data[10][1]} \n"
+                                    f"11 уровень: {user_level_data.exp_data[11][1]} \n"
+                                    f"12 уровень: {user_level_data.exp_data[12][1]} \n",
                         color=0x00ff00)
 
     async with ctx.typing():
