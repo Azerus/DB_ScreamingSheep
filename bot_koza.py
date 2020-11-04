@@ -14,7 +14,9 @@ import youtube_dl
 
 
 token = str(os.environ.get('BOT_TOKEN'))
-client = commands.Bot(command_prefix=koza_settings.PREFIX)
+intents = discord.Intents.default()
+intents.members = True
+client = commands.Bot(command_prefix=koza_settings.PREFIX, intents=intents)
 
 cluster = MongoClient(str(os.environ.get('DB')))
 db = cluster["discord"]
@@ -22,7 +24,6 @@ collection = db["user_data"]
 music_status = koza_settings.MusicStatus.NONE
 music_collection = ["", "", "", "", ""]
 max_music = 5
-# client = discord.Client()
 
 ytdl_format_options = {
     'format': 'bestaudio/best',
@@ -253,6 +254,13 @@ async def clear(ctx, channel, number):
             delete = True
 
     if not delete or not number.isdigit():
+        emb = discord.Embed(title=f"Предупреждение",
+                            description=f"Вы не администратор. Вам не доступна эта команда!",
+                            color=0x00ff00)
+
+        async with ctx.typing():
+            time.sleep(1)
+        await ctx.channel.send(embed=emb)
         return
 
     channel_purge = get_channel(str(channel))
@@ -308,7 +316,12 @@ async def rewards(ctx):
                                     f"2 уровень: {user_level_data.exp_data[2][1]} \n"
                                     f"3 уровень: {user_level_data.exp_data[3][1]} \n"
                                     f"4 уровень: {user_level_data.exp_data[4][1]} \n"
-                                    f"5 уровень: {user_level_data.exp_data[5][1]} \n",
+                                    f"5 уровень: {user_level_data.exp_data[5][1]} \n"
+                                    f"6 уровень: {user_level_data.exp_data[6][1]} \n"
+                                    f"7 уровень: {user_level_data.exp_data[7][1]} \n"
+                                    f"8 уровень: {user_level_data.exp_data[8][1]} \n"
+                                    f"9 уровень: {user_level_data.exp_data[9][1]} \n"
+                                    f"10 уровень: {user_level_data.exp_data[10][1]} \n",
                         color=0x00ff00)
 
     async with ctx.typing():
@@ -386,7 +399,7 @@ async def koza_dj_play(ctx, url: str):
             player = await YTDLSource.from_url(url, loop=client.loop, stream=True)
             ctx.voice_client.play(player, after=lambda e: finish(player.title))
             voice.source = discord.PCMVolumeTransformer(voice.source)
-            voice.source.volume = 0.07
+            voice.source.volume = 0.3
 
             emb = discord.Embed(title=f"Коза диджей",
                                 description=f"Сейчас играет: {player.title}",
@@ -404,5 +417,48 @@ async def koza_dj_play(ctx, url: str):
                                 color=0x00ff00)
 
             await ctx.channel.send(embed=emb)
+
+
+@client.command(brief='- Remake ranks for all server users')
+async def remake_ranks(ctx):
+    access = False
+
+    for role in ctx.author.roles:
+        if role.name.lower() in [ignore for ignore in koza_settings.moderation_groups]:
+            access = True
+
+    if not access:
+        emb = discord.Embed(title=f"Предупреждение",
+                            description=f"Вы не администратор. Вам не доступна эта команда!",
+                            color=0x00ff00)
+
+        async with ctx.typing():
+            time.sleep(1)
+        await ctx.channel.send(embed=emb)
+        return
+
+    server_id = client.get_guild(int(os.environ.get('SERVER_ID')))
+    for member in server_id.members:
+        u_id = {"id": member.id}
+
+        if collection.count_documents(u_id) == 0:
+            continue
+
+        user_data = collection.find(u_id)
+        cur_level = 0
+
+        for role in member.roles:
+            if role.name == "@everyone":
+                continue
+
+            await member.remove_roles(role)
+
+        for user in user_data:
+            cur_level = user["level"]
+            role = get(server_id.roles, name=user_level_data.exp_data[cur_level][1])
+            if role is not None:
+                await member.add_roles(role)
+                print("Роль пользователя " + member.name + " переназначена на " + role.name)
+
 
 client.run(token)
