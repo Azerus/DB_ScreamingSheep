@@ -4,13 +4,19 @@ respond = ["коза", "козу", "козы", "козой", "козе"]
 games = ["Heroes of the Storm",
          "Skyrim: Goat Edition",
          "Warcraft 3: Refunded",
+         "Plotva III: Wild Hunt",
+         "Goat Among Us",
+         "Cybergoat 2077",
          "сыщика",
          "грязные игры"]
 watching = ["на тебя!",
             "стрим HappyDerg",
             "Netflix",
             "акции Activision Blizzard",
-            "темы на форуме",
+            "темы на форуме HotS",
+            "обзор Культаса",
+            "Хентай (?)",
+            "Goat Potter and the Anus of Fire",
             "фильм Паршивая овца"]
 special = "трансляцию Blizzcon 2021"
 listening = ["Авторадио",
