@@ -142,7 +142,7 @@ class Koza(commands.Cog):
                     await message.author.remove_roles(role)
 
                 role = get(server_id.roles, name=user_level_data.exp_data[new_level][1])
-                if role is not None:
+                if role is not None and not message.author.has_role(role):
                     await message.author.add_roles(role)
 
             collection.update_one({"id": author_id}, {"$set": {"xp": new_xp}}, upsert=True)
