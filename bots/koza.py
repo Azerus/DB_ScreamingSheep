@@ -87,7 +87,7 @@ class Koza(commands.Cog):
             async with message.channel.typing():
                 time.sleep(1)
 
-            text = random.choice(koza_interactions.special_reaction).format(message.author.name)
+            text = random.choice(koza_interactions.reaction).format(message.author.name)
 
             emb = discord.Embed(title=f"Действия козы:",
                                 description=text,
@@ -142,7 +142,7 @@ class Koza(commands.Cog):
                     await message.author.remove_roles(role)
 
                 role = get(server_id.roles, name=user_level_data.exp_data[new_level][1])
-                if role is not None and not message.author.has_role(role):
+                if role is not None and role not in message.author.roles:
                     await message.author.add_roles(role)
 
             collection.update_one({"id": author_id}, {"$set": {"xp": new_xp}}, upsert=True)
