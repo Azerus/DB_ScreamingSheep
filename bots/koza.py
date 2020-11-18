@@ -137,8 +137,10 @@ class Koza(commands.Cog):
 
                 server_id = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
 
-                role = get(server_id.roles, name=user_level_data.exp_data[cur_level][1])
-                if role is not None:
+                for role in message.author.roles:
+                    if role.name == "@everyone":
+                        continue
+
                     await message.author.remove_roles(role)
 
                 role = get(server_id.roles, name=user_level_data.exp_data[new_level][1])
