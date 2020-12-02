@@ -66,7 +66,7 @@ class Koza(commands.Cog):
             if delete:
                 log_channel = functions.get_channel(settings.log_channel, server)
                 if log_channel is not None:
-                    await log_channel.send(message.author.name + ": " + msg + "\n" "Плохое слово: " + bot_react[1])
+                    await log_channel.send(message.author.display_name + ": " + msg + "\n" "Плохое слово: " + bot_react[1])
 
                 await message.delete()
                 async with message.channel.typing():
@@ -87,7 +87,7 @@ class Koza(commands.Cog):
             async with message.channel.typing():
                 time.sleep(1)
 
-            text = random.choice(koza_interactions.reaction).format(message.author.name)
+            text = random.choice(koza_interactions.reaction).format(message.author.display_name)
 
             emb = discord.Embed(title=f"Действия козы:",
                                 description=text,
@@ -128,8 +128,8 @@ class Koza(commands.Cog):
             new_xp = cur_xp + 1
             new_level = cur_level
             new_name = cur_name
-            if cur_name != message.author.name:
-                new_name = message.author.name
+            if cur_name != message.author.display_name:
+                new_name = message.author.display_name
 
             if new_xp >= user_level_data.exp_data[cur_level][2]:
                 new_level = cur_level+1
@@ -193,7 +193,7 @@ class Koza(commands.Cog):
         collection = DB.collection
 
         if collection.count_documents(u_id) == 0:
-            emb = discord.Embed(title=f"Профиль {ctx.author.name}",
+            emb = discord.Embed(title=f"Профиль {ctx.author.display_name}",
                                 description=f"У вас нет системы уровня!!!",
                                 color=0x00ff00)
 
@@ -211,7 +211,7 @@ class Koza(commands.Cog):
             cur_xp = user["xp"]
             cur_level = user["level"]
 
-        emb = discord.Embed(title=f"Профиль {ctx.author.name}",
+        emb = discord.Embed(title=f"Профиль {ctx.author.display_name}",
                             description=f"Уровень: {cur_level} \n"
                                         f"Текущий опыт: {cur_xp} ед. \n"
                                         f"До следующего уровня: {user_level_data.exp_data[cur_level][2] - cur_xp} ед.",
@@ -349,7 +349,7 @@ class Koza(commands.Cog):
                 role = get(server.roles, name=user_level_data.exp_data[user["level"]][1])
                 if role is not None:
                     await member.add_roles(role)
-                    print("Роль пользователя " + member.name + " переназначена на " + role.name)
+                    print("Роль пользователя " + member.display_name + " переназначена на " + role.name)
 
 
 def setup(main):
