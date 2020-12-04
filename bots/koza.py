@@ -53,6 +53,42 @@ class Koza(commands.Cog):
         print(f"Logged in as ---->", self.bot.user)
 
     @commands.Cog.listener()
+    async def on_message_edit(self, message_before, message_after):
+        msg = message_after.content.lower()
+        server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
+
+        # profanity_filter
+        bot_react = functions.check_message(msg)
+
+        if bot_react[0]:
+            delete = functions.is_not_ignore_group(message_after.author.roles)
+
+            if delete:
+                log_channel = functions.get_channel(settings.log_channel, server)
+                if log_channel is not None:
+                    await log_channel.send(
+                        message_after.author.display_name + ": " + msg + "\n" "Плохое слово: " + bot_react[1])
+
+                await message_after.delete()
+                async with message_after.channel.typing():
+                    time.sleep(1)
+                await message_after.channel.send(koza_interactions.scream)
+                return
+
+        # koza
+        msg_before = message_before.content.lower()
+
+        if "коза орет" in msg_before and "коза орет" not in msg:
+            async with message_after.channel.typing():
+                time.sleep(1)
+
+            emb = discord.Embed(title=f"Действия козы:",
+                                description=f"Коза с подозрением смотрит на {message_after.author.display_name} и не хочет, чтобы с ней так шутили!",
+                                color=0x00ff00)
+
+            await message_before.channel.send(embed=emb)
+
+    @commands.Cog.listener()
     async def on_message(self, message):
         msg = message.content.lower()
         server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
