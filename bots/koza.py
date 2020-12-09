@@ -83,7 +83,8 @@ class Koza(commands.Cog):
                 time.sleep(1)
 
             emb = discord.Embed(title=f"Действия козы:",
-                                description=f"Коза с подозрением смотрит на {message_after.author.display_name} и не хочет, чтобы с ней так шутили!",
+                                description=f"Коза с подозрением смотрит на {message_after.author.display_name} "
+                                            f"и не хочет, чтобы с ней так шутили!",
                                 color=0x00ff00)
 
             await message_before.channel.send(embed=emb)
@@ -102,7 +103,8 @@ class Koza(commands.Cog):
             if delete:
                 log_channel = functions.get_channel(settings.log_channel, server)
                 if log_channel is not None:
-                    await log_channel.send(message.author.display_name + ": " + msg + "\n" "Плохое слово: " + bot_react[1])
+                    await log_channel.send(message.author.display_name + ": " +
+                                           msg + "\n" "Плохое слово: " + bot_react[1])
 
                 await message.delete()
                 async with message.channel.typing():
@@ -182,6 +184,17 @@ class Koza(commands.Cog):
                 role = get(server_id.roles, name=user_level_data.exp_data[new_level][1])
                 if role is not None and role not in message.author.roles:
                     await message.author.add_roles(role)
+
+                    if role.name != user_level_data.exp_data[1][1]:
+                        com_channel = functions.get_channel(settings.command_channel, server)
+
+                        if com_channel is not None:
+                            emb = discord.Embed(title=f"Система оповещения \"Koza v2.1.3.4.5\"",
+                                                description=f"Коза присваивает {message.author.display_name} "
+                                                            f"звание \"{role.name}\"",
+                                                color=0x00ff00)
+
+                            await com_channel.send(embed=emb)
 
             collection.update_one({"id": author_id}, {"$set": {"xp": new_xp}}, upsert=True)
             collection.update_one({"id": author_id}, {"$set": {"level": new_level}}, upsert=True)
