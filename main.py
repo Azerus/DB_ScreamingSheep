@@ -9,15 +9,15 @@ intents = discord.Intents.default()
 intents.members = True
 
 ss_token = str(os.environ.get('SS_BOT_TOKEN'))
-rl_token = str(os.environ.get('RL_BOT_TOKEN'))
+am_token = str(os.environ.get('AM_BOT_TOKEN'))
 
 koza = commands.Bot(command_prefix=settings.PREFIX, intents=intents)
-raven_lord = commands.Bot(command_prefix=settings.PREFIX, intents=intents)
+amadeus = commands.Bot(command_prefix=settings.PREFIX, intents=intents)
 
 koza.load_extension('bots.koza')
-raven_lord.load_extension('bots.ravenlord')
+amadeus.load_extension('bots.amadeus')
 
 loop = asyncio.get_event_loop()
 loop.create_task(koza.start(ss_token))
-loop.create_task(raven_lord.start(rl_token))
+loop.create_task(amadeus.start(am_token))
 loop.run_forever()
