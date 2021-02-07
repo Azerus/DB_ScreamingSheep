@@ -11,8 +11,8 @@ intents.members = True
 ss_token = str(os.environ.get('SS_BOT_TOKEN'))
 am_token = str(os.environ.get('AM_BOT_TOKEN'))
 
-koza = commands.Bot(command_prefix=settings.PREFIX, intents=intents)
-amadeus = commands.Bot(command_prefix=settings.PREFIX, intents=intents)
+koza = commands.Bot(command_prefix=settings.KOZA_PREFIX, intents=intents)
+amadeus = commands.Bot(command_prefix=settings.AMADEUS_PREFIX, intents=intents)
 
 koza.load_extension('bots.koza')
 amadeus.load_extension('bots.amadeus')
