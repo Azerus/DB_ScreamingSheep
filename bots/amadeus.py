@@ -39,9 +39,11 @@ class Amadeus(commands.Cog):
 
                     await log_channel.send(embed=emb)
 
+                answer = random.choice(amadeus_interactions.profanity_answer)
+                count = len(answer)
                 async with message.channel.typing():
-                    time.sleep(1)
-                await message.reply(random.choice(amadeus_interactions.profanity_answer))
+                    time.sleep(0.1 * count)
+                await message.reply(answer)
                 return
 
 
