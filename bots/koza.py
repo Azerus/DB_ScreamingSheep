@@ -94,24 +94,6 @@ class Koza(commands.Cog):
         msg = message.content.lower()
         server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
 
-        # profanity_filter
-        bot_react = functions.check_message(msg)
-
-        if bot_react[0]:
-            delete = functions.is_not_ignore_group(message.author.roles)
-
-            if delete:
-                log_channel = functions.get_channel(settings.log_channel, server)
-                if log_channel is not None:
-                    await log_channel.send(message.author.display_name + ": " +
-                                           msg + "\n" "Плохое слово: " + bot_react[1])
-
-                await message.delete()
-                async with message.channel.typing():
-                    time.sleep(1)
-                await message.channel.send(koza_interactions.scream)
-                return
-
         # interactions
         if msg.find("репортаж козы с места событий") != -1:
             async with message.channel.typing():
