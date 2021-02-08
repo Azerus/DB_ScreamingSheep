@@ -283,5 +283,5 @@ class Amadeus(commands.Cog):
         await ctx.send(f"""Количество пользователей: {server_id.member_count}""")
 
 
-def setup(amadeus):
-    amadeus.add_cog(Amadeus(amadeus))
+def setup(main):
+    main.add_cog(Amadeus(main))
