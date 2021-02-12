@@ -124,7 +124,7 @@ class Amadeus(commands.Cog):
 
                 answer = response.query_result.fulfillment_text
                 if answer is None or answer == '':
-                    answer = 'Я Вас не совсем поняла!'
+                    answer = random.choice(amadeus_interactions.not_understand)
 
                 count = len(answer)
 
