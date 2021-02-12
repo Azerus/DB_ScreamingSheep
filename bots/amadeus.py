@@ -1,4 +1,6 @@
 import discord
+import dialogflow
+from google.api_core.exceptions import InvalidArgument
 from discord.ext import commands
 from discord.utils import get
 from discord.ext import tasks
@@ -19,9 +21,16 @@ class Amadeus(commands.Cog):
         self.bot = bot
         self.status_task.start()
 
-    @tasks.loop(seconds=3600.0)
+    @tasks.loop(seconds=4100.0)
     async def status_task(self):
-        await self.bot.change_presence(status=discord.Status.invisible)
+        status = random.randint(1, 2)
+
+        if status == 1:
+            await self.bot.change_presence(status=discord.Status.invisible)
+
+        elif status == 2:
+            await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching,
+                                                                     name=random.choice(amadeus_interactions.watching)))
 
     @status_task.before_loop
     async def before_printer(self):
@@ -65,6 +74,7 @@ class Amadeus(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+
         msg = message.content.lower()
         server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
 
@@ -90,6 +100,37 @@ class Amadeus(commands.Cog):
                     time.sleep(0.1 * count)
                 await message.reply(answer)
                 return
+
+        # AmadeusAI
+        bot_ai = False
+
+        if self.bot.user.mentioned_in(message):
+            bot_ai = True
+
+        if bot_ai is True:
+
+            if message.author != self.bot.user:
+                DIALOGFLOW_PROJECT_ID = 'small-talk-c9av'
+                DIALOGFLOW_LANGUAGE_CODE = 'ru'
+                SESSION_ID = 'me'
+                session_client = dialogflow.SessionsClient()
+                session = session_client.session_path(DIALOGFLOW_PROJECT_ID, SESSION_ID)
+                text_input = dialogflow.types.TextInput(text=message.content, language_code=DIALOGFLOW_LANGUAGE_CODE)
+                query_input = dialogflow.types.QueryInput(text=text_input)
+                try:
+                    response = session_client.detect_intent(session=session, query_input=query_input)
+                except InvalidArgument:
+                    raise
+
+                answer = response.query_result.fulfillment_text
+                if answer is None:
+                    answer = 'Я Вас не совсем поняла!'
+
+                count = len(answer)
+
+                async with message.channel.typing():
+                    time.sleep(0.1 * count)
+                await message.reply(answer)
 
         # level system
         for role in message.author.roles:
@@ -148,7 +189,7 @@ class Amadeus(commands.Cog):
 
                         if com_channel is not None:
                             reward_text = random.choice(amadeus_interactions.reward_messages)
-                            await com_channel.send(reward_text.format(message.author.mention, role.name))
+                            await com_channel.send(reward_text.format(message.author.mention, role.mention))
 
             collection.update_one({"id": author_id}, {"$set": {"xp": new_xp}}, upsert=True)
             collection.update_one({"id": author_id}, {"$set": {"level": new_level}}, upsert=True)
