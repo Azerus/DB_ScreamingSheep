@@ -123,7 +123,7 @@ class Amadeus(commands.Cog):
                     raise
 
                 answer = response.query_result.fulfillment_text
-                if answer is None:
+                if answer is None or answer == '':
                     answer = 'Я Вас не совсем поняла!'
 
                 count = len(answer)
