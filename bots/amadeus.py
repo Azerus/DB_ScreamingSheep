@@ -104,7 +104,7 @@ class Amadeus(commands.Cog):
         # AmadeusAI
         bot_ai = False
 
-        if self.bot.user.mentioned_in(message):
+        if self.bot.user.mentioned_in(message) and message.content != "":
             bot_ai = True
 
         if bot_ai is True:
@@ -197,7 +197,7 @@ class Amadeus(commands.Cog):
 
     @commands.command(brief='- Show your rank')
     @functions.is_channel(settings.command_channel)
-    async def rank(self, ctx):
+    async def show_rank(self, ctx):
         author_id = ctx.author.id
         u_id = {"id": author_id}
         collection = DB.collection
@@ -247,6 +247,17 @@ class Amadeus(commands.Cog):
                                         f"10 уровень: {user_level_data.exp_data[10][1]} \n"
                                         f"11 уровень: {user_level_data.exp_data[11][1]} \n"
                                         f"12 уровень: {user_level_data.exp_data[12][1]} \n",
+                            color=0x00ff00)
+
+        async with ctx.typing():
+            time.sleep(1)
+        await ctx.channel.send(embed=emb)
+
+    @commands.command(brief='- Give selected rank (work on max rank only)')
+    @functions.is_channel(settings.command_channel)
+    async def give_rank(self, ctx, rank):
+        emb = discord.Embed(title=f"Оповещение",
+                            description=f"Команда пока не работает",
                             color=0x00ff00)
 
         async with ctx.typing():
