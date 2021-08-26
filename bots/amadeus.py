@@ -102,7 +102,9 @@ class Amadeus(commands.Cog):
                     await log_channel.send(embed=emb)
 
                 user_data = collection.find(u_id)
-                answer = random.choice(amadeus_interactions.profanity_answer_action).format(message.author.display_name)
+                answer = random.choice(amadeus_interactions.profanity_answer)
+
+                deleted = False
 
                 for user in user_data:
                     cur_prof = user["profanity"]
@@ -117,13 +119,18 @@ class Amadeus(commands.Cog):
 
                     if cur_prof > 2:
                         await message.delete()
+                        deleted = True
                         answer = random.choice(amadeus_interactions.profanity_answer_action).format(message.author.display_name)
 
-                collection.update_one({"id": author_id}, {"$set": {"profanity": cur_prof, "prof_data": cur_prof_data}}, upsert=True)
+                    collection.update_one({"id": author_id}, {"$set": {"profanity": cur_prof, "prof_data": cur_prof_data}}, upsert=True)
+
                 count = len(answer)
                 async with message.channel.typing():
                     time.sleep(0.1 * count)
-                await message.channel.send(answer)
+                if deleted is False:
+                    await message.reply(answer)
+                else:
+                    await message.channel.send(answer)
                 return
 
         # AmadeusAI
