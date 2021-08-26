@@ -13,6 +13,7 @@ import user_level_data
 import DB
 import time
 import random
+import datetime
 from bots import amadeus_interactions
 
 
@@ -75,6 +76,12 @@ class Amadeus(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
 
+        collection = DB.collection
+        author_id = message.author.id
+        guild_id = message.guild.id
+
+        u_id = {"id": author_id}
+
         msg = message.content.lower()
         server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
 
@@ -94,11 +101,29 @@ class Amadeus(commands.Cog):
 
                     await log_channel.send(embed=emb)
 
-                answer = random.choice(amadeus_interactions.profanity_answer)
+                user_data = collection.find(u_id)
+                answer = random.choice(amadeus_interactions.profanity_answer_action).format(message.author.display_name)
+
+                for user in user_data:
+                    cur_prof = user["profanity"]
+                    cur_prof_data = user["prof_data"]
+
+                    time_data = datetime.datetime.now
+                    if time_data().day != cur_prof_data:
+                        cur_prof_data = time_data().day
+                        cur_prof = 0
+
+                    cur_prof = cur_prof + 1
+
+                    if cur_prof > 2:
+                        await message.delete()
+                        answer = random.choice(amadeus_interactions.profanity_answer_action).format(message.author.display_name)
+
+                collection.update_one({"id": author_id}, {"$set": {"profanity": cur_prof, "prof_data": cur_prof_data}}, upsert=True)
                 count = len(answer)
                 async with message.channel.typing():
                     time.sleep(0.1 * count)
-                await message.reply(answer)
+                await message.channel.send(answer)
                 return
 
         # AmadeusAI
@@ -137,20 +162,14 @@ class Amadeus(commands.Cog):
             if role.name.lower() in [ignore for ignore in user_level_data.ignore_group]:
                 return
 
-        author_id = message.author.id
-        guild_id = message.guild.id
-
-        u_id = {"id": author_id}
-
         if message.author == self.bot.user:
             return
 
         if message.author.bot:
             return
 
-        collection = DB.collection
         if collection.count_documents(u_id) == 0:
-            user_info = {"id": author_id, "guild_id": guild_id, "user_name": message.author.name, "level": 0, "xp": 0}
+            user_info = {"id": author_id, "guild_id": guild_id, "user_name": message.author.name, "level": 0, "xp": 0, "profanity": 0, "prof_data": 0}
             collection.insert_one(user_info)
 
         user_data = collection.find(u_id)
