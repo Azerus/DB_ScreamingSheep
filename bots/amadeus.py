@@ -130,7 +130,10 @@ class Amadeus(commands.Cog):
                 if deleted is False:
                     await message.reply(answer)
                 else:
-                    await message.channel.send(answer)
+                    emb = discord.Embed(title=f"Системное сообщение:",
+                                        description=answer,
+                                        color=0x00ff00)
+                    await message.channel.send(embed=emb)
                 return
 
         # AmadeusAI
