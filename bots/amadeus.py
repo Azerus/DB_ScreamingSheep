@@ -370,7 +370,7 @@ class Amadeus(commands.Cog):
     async def pda_news_task(self):
         async with aiohttp.ClientSession() as session:
             async with session.get('https://4pda.to') as response:
-                if response.status != 200:
+                if response.status != 1000:
                     print("Load url error!")
                     return
 
