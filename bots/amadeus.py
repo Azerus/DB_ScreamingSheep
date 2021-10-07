@@ -14,6 +14,8 @@ import DB
 import time
 import random
 import datetime
+import aiohttp
+from bs4 import BeautifulSoup
 from bots import amadeus_interactions
 
 
@@ -21,6 +23,7 @@ class Amadeus(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.status_task.start()
+        self.pda_news_task.start()
 
     @tasks.loop(seconds=4100.0)
     async def status_task(self):
@@ -362,6 +365,42 @@ class Amadeus(commands.Cog):
         async with ctx.typing():
             time.sleep(1)
         await ctx.send(f"""Количество пользователей: {server_id.member_count}""")
+
+    @tasks.loop(seconds=30.0)
+    async def pda_news_task(self):
+        async with aiohttp.ClientSession() as session:
+            async with session.get('https://4pda.to') as response:
+                if response.status != 200:
+                    print("Load url error!")
+                    return
+
+                soup = BeautifulSoup(await response.read(), 'html.parser')
+
+                news = soup.find_all(attrs={"class": "v-panel"})
+                # print(news[0].a['href'].replace("#comments", ""))
+                # print(news[0].div.meta['content'])
+
+                news_db = DB.news_parse
+                url = {"url": "https://4pda.to"}
+
+                if news_db.count_documents(url) == 0:
+                    news_info = {"url": "https://4pda.to", "news_time": ""}
+                    news_db.insert_one(news_info)
+
+                news_data = news_db.find_one(url)
+
+                if news_data["news_time"] != news[0].div.meta['content']:
+                    news_db.update_one(url, {"$set": {"news_time": news[0].div.meta['content']}}, upsert=True)
+
+                    server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
+                    pda_channel = functions.get_channel(settings.pda_channel, server)
+
+                    if pda_channel is not None:
+                        await pda_channel.send(amadeus_interactions.pda_news + " " + news[0].a['href'].replace("#comments", ""))
+
+    @pda_news_task.before_loop
+    async def before_printer(self):
+        await self.bot.wait_until_ready()
 
 
 def setup(main):
