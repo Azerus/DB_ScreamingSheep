@@ -379,18 +379,19 @@ class Amadeus(commands.Cog):
                 news = soup.find_all(attrs={"class": "v-panel"})
                 # print(news[0].a['href'].replace("#comments", ""))
                 # print(news[0].div.meta['content'])
+                # print(news[0])
 
                 news_db = DB.news_parse
                 url = {"url": "https://4pda.to"}
 
                 if news_db.count_documents(url) == 0:
-                    news_info = {"url": "https://4pda.to", "news_time": ""}
+                    news_info = {"url": "https://4pda.to", "news_time": "", "news_title": ""}
                     news_db.insert_one(news_info)
 
                 news_data = news_db.find_one(url)
 
-                if news_data["news_time"] != news[0].div.meta['content']:
-                    news_db.update_one(url, {"$set": {"news_time": news[0].div.meta['content']}}, upsert=True)
+                if news_data["news_time"] != news[0].div.meta['content'] and news_data["news_title"] != news[0].a['title']:
+                    news_db.update_one(url, {"$set": {"news_time": news[0].div.meta['content'], "news_title": news[0].a['title']}}, upsert=True)
 
                     server = self.bot.get_guild(int(os.environ.get('SERVER_ID')))
                     pda_channel = functions.get_channel(settings.pda_channel, server)
