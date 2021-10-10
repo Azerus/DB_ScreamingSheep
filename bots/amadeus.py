@@ -366,12 +366,13 @@ class Amadeus(commands.Cog):
             time.sleep(1)
         await ctx.send(f"""Количество пользователей: {server_id.member_count}""")
 
-    @tasks.loop(seconds=30.0)
+    @tasks.loop(seconds=60.0)
     async def pda_news_task(self):
         async with aiohttp.ClientSession() as session:
             async with session.get('https://4pda.to') as response:
-                if response.status != 1000:
+                if response.status != 200:
                     print("Load url error!")
+                    await session.close()
                     return
 
                 soup = BeautifulSoup(await response.read(), 'html.parser')
@@ -398,6 +399,8 @@ class Amadeus(commands.Cog):
 
                     if pda_channel is not None:
                         await pda_channel.send(amadeus_interactions.pda_news + " " + news[0].a['href'].replace("#comments", ""))
+
+            await session.close()
 
     @pda_news_task.before_loop
     async def before_printer(self):
